@@ -8,7 +8,6 @@ Go hexagonal architecture implementation example.
 
 Before running this project locally, you need these dependencies
 - Go 1.15+
-- docker
 
 ## Project architecture
 
