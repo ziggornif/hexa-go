@@ -57,7 +57,7 @@ func (s *server) Run() {
 	})
 
 	apiRouter := router.Group("/api")
-	err = handlers.MakeRestHandler(apiRouter, db, s.logger)
+	err = handlers.MakeHandlers(apiRouter, db, s.logger)
 	if err != nil {
 		s.exit()
 	}
