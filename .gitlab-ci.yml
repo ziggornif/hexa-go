@@ -31,9 +31,11 @@ test:
   stage: 🧪 test
   services:
     - postgres:latest
-  script:
+  before_script:
     - go get -u github.com/jstemmer/go-junit-report
+  script:
     - make test
+    - make test-junit
   artifacts:
     when: always
     expire_in: 1 day
