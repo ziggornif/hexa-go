@@ -65,7 +65,7 @@ func (s *service) GetTodo(id string) (*Todo, *error.HexagoError) {
 	if err != nil {
 		s.logger.Errorf("[Service] GetTodo - Error while getting todo %s", id)
 		s.logger.Debugf("... context : %s", err)
-		return nil, &error.HexagoError{Error: err}
+		return nil, &error.HexagoError{Kind: "NotFound", Error: errors.New("todo not found")}
 	}
 
 	return todo, nil
@@ -73,11 +73,9 @@ func (s *service) GetTodo(id string) (*Todo, *error.HexagoError) {
 
 // UpdateTodo - update todo
 func (s *service) UpdateTodo(id string, update Todo) (*Todo, *error.HexagoError) {
-	todo, err := s.repo.FindByID(id)
-	if err != nil {
-		s.logger.Errorf("[Service] UpdateTodo - Todo not found.")
-		s.logger.Debugf("... context : %s", err)
-		return nil, &error.HexagoError{Error: err}
+	todo, getErr := s.GetTodo(id)
+	if getErr != nil {
+		return nil, getErr
 	}
 
 	todo.Title = update.Title
@@ -85,7 +83,7 @@ func (s *service) UpdateTodo(id string, update Todo) (*Todo, *error.HexagoError)
 	todo.Completed = update.Completed
 	todo.UpdatedAt = time.Now()
 
-	err = s.repo.Update(todo)
+	err := s.repo.Update(todo)
 	if err != nil {
 		s.logger.Errorf("[Service] UpdateTodo - Error while updating todo")
 		s.logger.Debugf("... context : %s", err)

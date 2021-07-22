@@ -1,8 +1,8 @@
 package todo
 
 import (
-	"hexa-go/infra"
 	"hexa-go/infra/config"
+	"hexa-go/infra/logger"
 	"hexa-go/infra/storage"
 	"testing"
 	"time"
@@ -17,19 +17,19 @@ func cleanInserted(db *pg.DB, id string) {
 }
 
 func TestNewRepoError(t *testing.T) {
-	logger := infra.GetLogger()
+	logger := logger.GetLogger()
 	conf, _ := config.LoadConfig("../..", logger)
 	db, _ := storage.DBConnect(conf.GetConfig(), logger)
 	_ = db.Close()
 
 	_, err := NewRepository(db, logger)
 	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "pg: database is closed")
+	assert.Equal(t, "pg: database is closed", err.Error())
 	storage.DBClose()
 }
 
 func TestInsert(t *testing.T) {
-	logger := infra.GetLogger()
+	logger := logger.GetLogger()
 	conf, _ := config.LoadConfig("../..", logger)
 	db, _ := storage.DBConnect(conf.GetConfig(), logger)
 
@@ -49,7 +49,7 @@ func TestInsert(t *testing.T) {
 }
 
 func TestInsertError(t *testing.T) {
-	logger := infra.GetLogger()
+	logger := logger.GetLogger()
 	conf, _ := config.LoadConfig("../..", logger)
 	db, _ := storage.DBConnect(conf.GetConfig(), logger)
 
@@ -66,11 +66,11 @@ func TestInsertError(t *testing.T) {
 	})
 
 	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "ERROR #42P01 relation \"todos\" does not exist")
+	assert.Equal(t, "ERROR #42P01 relation \"todos\" does not exist", err.Error())
 }
 
 func TestFetch(t *testing.T) {
-	logger := infra.GetLogger()
+	logger := logger.GetLogger()
 	conf, _ := config.LoadConfig("../..", logger)
 	db, _ := storage.DBConnect(conf.GetConfig(), logger)
 
@@ -88,17 +88,17 @@ func TestFetch(t *testing.T) {
 
 	todos, _ := repo.Fetch()
 
-	assert.Equal(t, len(todos), 1)
-	assert.Equal(t, todos[0].ID, "1234")
-	assert.Equal(t, todos[0].Title, "Test")
-	assert.Equal(t, todos[0].Completed, false)
-	assert.Equal(t, todos[0].Order, 0)
+	assert.Equal(t, 1, len(todos))
+	assert.Equal(t, "1234", todos[0].ID)
+	assert.Equal(t, "Test", todos[0].Title)
+	assert.Equal(t, false, todos[0].Completed)
+	assert.Equal(t, 0, todos[0].Order)
 
 	cleanInserted(db, "1234")
 }
 
 func TestFetchError(t *testing.T) {
-	logger := infra.GetLogger()
+	logger := logger.GetLogger()
 	conf, _ := config.LoadConfig("../..", logger)
 	db, _ := storage.DBConnect(conf.GetConfig(), logger)
 
@@ -107,11 +107,11 @@ func TestFetchError(t *testing.T) {
 
 	_, err := repo.Fetch()
 	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "ERROR #42P01 relation \"todos\" does not exist")
+	assert.Equal(t, "ERROR #42P01 relation \"todos\" does not exist", err.Error())
 }
 
 func TestFindByID(t *testing.T) {
-	logger := infra.GetLogger()
+	logger := logger.GetLogger()
 	conf, _ := config.LoadConfig("../..", logger)
 	db, _ := storage.DBConnect(conf.GetConfig(), logger)
 
@@ -128,16 +128,16 @@ func TestFindByID(t *testing.T) {
 	assert.Nil(t, err)
 
 	created, _ := repo.FindByID("1234")
-	assert.Equal(t, created.ID, "1234")
-	assert.Equal(t, created.Title, "Test")
-	assert.Equal(t, created.Completed, false)
-	assert.Equal(t, created.Order, 0)
+	assert.Equal(t, "1234", created.ID)
+	assert.Equal(t, "Test", created.Title)
+	assert.Equal(t, false, created.Completed)
+	assert.Equal(t, 0, created.Order)
 
 	cleanInserted(db, "1234")
 }
 
 func TestFindByIDError(t *testing.T) {
-	logger := infra.GetLogger()
+	logger := logger.GetLogger()
 	conf, _ := config.LoadConfig("../..", logger)
 	db, _ := storage.DBConnect(conf.GetConfig(), logger)
 
@@ -146,11 +146,11 @@ func TestFindByIDError(t *testing.T) {
 
 	_, err := repo.FindByID("1234")
 	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "ERROR #42P01 relation \"todos\" does not exist")
+	assert.Equal(t, "ERROR #42P01 relation \"todos\" does not exist", err.Error())
 }
 
 func TestUpdate(t *testing.T) {
-	logger := infra.GetLogger()
+	logger := logger.GetLogger()
 	conf, _ := config.LoadConfig("../..", logger)
 	db, _ := storage.DBConnect(conf.GetConfig(), logger)
 
@@ -175,16 +175,16 @@ func TestUpdate(t *testing.T) {
 	assert.Nil(t, err)
 
 	updated, _ := repo.FindByID("1234")
-	assert.Equal(t, updated.ID, "1234")
-	assert.Equal(t, updated.Title, "TestUpdated")
-	assert.Equal(t, updated.Completed, true)
-	assert.Equal(t, updated.Order, 1)
+	assert.Equal(t, "1234", updated.ID)
+	assert.Equal(t, "TestUpdated", updated.Title)
+	assert.Equal(t, true, updated.Completed)
+	assert.Equal(t, 1, updated.Order)
 
 	cleanInserted(db, "1234")
 }
 
 func TestUpdateError(t *testing.T) {
-	logger := infra.GetLogger()
+	logger := logger.GetLogger()
 	conf, _ := config.LoadConfig("../..", logger)
 	db, _ := storage.DBConnect(conf.GetConfig(), logger)
 
@@ -198,11 +198,11 @@ func TestUpdateError(t *testing.T) {
 		Order:     1,
 	})
 	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "ERROR #42P01 relation \"todos\" does not exist")
+	assert.Equal(t, "ERROR #42P01 relation \"todos\" does not exist", err.Error())
 }
 
 func TestDelete(t *testing.T) {
-	logger := infra.GetLogger()
+	logger := logger.GetLogger()
 	conf, _ := config.LoadConfig("../..", logger)
 	db, _ := storage.DBConnect(conf.GetConfig(), logger)
 
@@ -226,7 +226,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestDeleteError(t *testing.T) {
-	logger := infra.GetLogger()
+	logger := logger.GetLogger()
 	conf, _ := config.LoadConfig("../..", logger)
 	db, _ := storage.DBConnect(conf.GetConfig(), logger)
 
@@ -236,5 +236,5 @@ func TestDeleteError(t *testing.T) {
 	err := repo.Delete("1234")
 
 	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "ERROR #42P01 relation \"todos\" does not exist")
+	assert.Equal(t, "ERROR #42P01 relation \"todos\" does not exist", err.Error())
 }

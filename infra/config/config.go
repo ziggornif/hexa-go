@@ -15,7 +15,6 @@ type Configuration struct {
 	DBName string `json:"dbName" mapstructure:"DB_NAME"`
 	DBUser string `json:"dbUser" mapstructure:"DB_USER"`
 	DBPass string `json:"dbPass" mapstructure:"DB_PASSWORD"`
-	ESURL  string `json:"esURL" mapstructure:"ES_URL"`
 }
 
 type configuration struct {
@@ -29,10 +28,11 @@ func LoadConfig(path string, logger *logrus.Logger) (*configuration, error) {
 	viper.SetConfigType("json")
 	viper.AddConfigPath(path)
 	viper.AutomaticEnv()
+	viper.SetDefault("PORT", 8080)
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Printf("%s", err)
+		log.Printf("Unable to read the config file: %s", err)
 		return nil, err
 	}
 	config := Configuration{}
@@ -66,9 +66,5 @@ func (c *configuration) ValidateConfig() {
 
 	if len(c.config.DBName) == 0 {
 		log.Fatal("Missing required 'DBName' parameter")
-	}
-
-	if len(c.config.ESURL) == 0 {
-		log.Fatal("Missing required 'ESURL' parameter")
 	}
 }

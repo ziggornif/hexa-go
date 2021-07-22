@@ -2,10 +2,11 @@ package main
 
 import (
 	"hexa-go/infra"
+	"hexa-go/infra/logger"
 )
 
 func main() {
-	logger := infra.GetLogger()
+	logger := logger.GetLogger()
 
 	server := infra.NewServer(logger)
 	server.Run()

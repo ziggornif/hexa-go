@@ -1,16 +1,15 @@
 package infra
 
 import (
+	"fmt"
+
 	"hexa-go/handlers"
 	"hexa-go/infra/config"
 	"hexa-go/infra/monitoring"
 	"hexa-go/infra/storage"
-	"log"
-	"net/http"
 	"os"
 
 	"github.com/gin-contrib/cors"
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -32,10 +31,10 @@ func NewServer(logger *logrus.Logger) Server {
 
 // Run - run server
 func (s *server) Run() {
+	s.logger.Info("[server] Run - starting...")
 	conf, err := config.LoadConfig(".", s.logger)
 	if err != nil {
-		log.Fatal("Unable to read the config file: ", err)
-		return
+		s.exit(err)
 	}
 
 	conf.ValidateConfig()
@@ -43,36 +42,29 @@ func (s *server) Run() {
 	db, errDB := storage.DBConnect(conf.GetConfig(), s.logger)
 
 	if errDB != nil {
-		s.exit()
+		s.exit(errDB)
 	}
 
 	router := gin.Default()
 	router.Use(cors.Default())
-	router.Use(static.Serve("/", static.LocalFile("./static", false)))
-	router.Use(static.Serve("/assets", static.LocalFile("./doc", false)))
-
-	router.LoadHTMLFiles("./doc/swagger.html")
-	router.GET("/docs", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "swagger.html", nil)
-	})
 
 	apiRouter := router.Group("/api")
 	err = handlers.MakeHandlers(apiRouter, db, s.logger)
 	if err != nil {
-		s.exit()
+		s.exit(err)
 	}
 
 	monitoring.PrometheusHandler(router)
 	monitoring.HeartbeatHandler(router)
 
-	err = router.Run()
+	err = router.Run(fmt.Sprintf(":%v", conf.GetConfig().Port))
 	if err != nil {
-		s.exit()
+		s.exit(err)
 	}
 }
 
-func (s *server) exit() {
-	s.logger.Error("Could not start app ...") //TODO: improve this log message
+func (s *server) exit(err error) {
+	s.logger.Error("Could not start app ...", err)
 	os.Exit(1)
 }
 

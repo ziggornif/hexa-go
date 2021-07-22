@@ -2,10 +2,11 @@ package todo
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"hexa-go/infra"
+	"hexa-go/infra/logger"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type repoMock struct{}
@@ -83,20 +84,20 @@ func (r *repoMockErr) Delete(string) error {
 }
 
 func TestListTodos(t *testing.T) {
-	service := NewService(&repoMock{}, infra.GetLogger())
+	service := NewService(&repoMock{}, logger.GetLogger())
 	todos, _ := service.ListTodos()
 	assert.Equal(t, 2, len(todos))
 }
 
 func TestListTodosError(t *testing.T) {
-	service := NewService(&repoMockErr{}, infra.GetLogger())
+	service := NewService(&repoMockErr{}, logger.GetLogger())
 	todos, err := service.ListTodos()
 	assert.Nil(t, todos)
-	assert.Equal(t, err.Error.Error(), "something wrong")
+	assert.Equal(t, "something wrong", err.Error.Error())
 }
 
 func TestCreateTodo(t *testing.T) {
-	service := NewService(&repoMock{}, infra.GetLogger())
+	service := NewService(&repoMock{}, logger.GetLogger())
 
 	created, err := service.CreateTodo(Todo{
 		Title:     "Test",
@@ -110,7 +111,7 @@ func TestCreateTodo(t *testing.T) {
 }
 
 func TestCreateTodoError(t *testing.T) {
-	service := NewService(&repoMockErr{}, infra.GetLogger())
+	service := NewService(&repoMockErr{}, logger.GetLogger())
 
 	created, err := service.CreateTodo(Todo{
 		Title:     "Test",
@@ -119,11 +120,11 @@ func TestCreateTodoError(t *testing.T) {
 	})
 
 	assert.Nil(t, created)
-	assert.Equal(t, err.Error.Error(), "creation error")
+	assert.Equal(t, "creation error", err.Error.Error())
 }
 
 func TestGetTodo(t *testing.T) {
-	service := NewService(&repoMock{}, infra.GetLogger())
+	service := NewService(&repoMock{}, logger.GetLogger())
 
 	todo, err := service.GetTodo("1234")
 
@@ -133,16 +134,16 @@ func TestGetTodo(t *testing.T) {
 }
 
 func TestGetTodoError(t *testing.T) {
-	service := NewService(&repoMockErr{}, infra.GetLogger())
+	service := NewService(&repoMockErr{}, logger.GetLogger())
 
 	todo, err := service.GetTodo("1234")
 
 	assert.Nil(t, todo)
-	assert.Equal(t, err.Error.Error(), "something wrong")
+	assert.Equal(t, "todo not found", err.Error.Error())
 }
 
 func TestUpdateTodo(t *testing.T) {
-	service := NewService(&repoMock{}, infra.GetLogger())
+	service := NewService(&repoMock{}, logger.GetLogger())
 
 	todo, err := service.UpdateTodo("1234", Todo{
 		Title:     "Test",
@@ -155,7 +156,7 @@ func TestUpdateTodo(t *testing.T) {
 }
 
 func TestUpdateTodoNotFountError(t *testing.T) {
-	service := NewService(&repoMockErr{}, infra.GetLogger())
+	service := NewService(&repoMockErr{}, logger.GetLogger())
 
 	todo, err := service.UpdateTodo("1234", Todo{
 		Title:     "Test2",
@@ -164,12 +165,11 @@ func TestUpdateTodoNotFountError(t *testing.T) {
 	})
 
 	assert.Nil(t, todo)
-	assert.Equal(t, err.Error.Error(), "something wrong")
+	assert.Equal(t, "todo not found", err.Error.Error())
 }
 
-
 func TestUpdateTodoError(t *testing.T) {
-	service := NewService(&repoMockErr{}, infra.GetLogger())
+	service := NewService(&repoMockErr{}, logger.GetLogger())
 
 	todo, err := service.UpdateTodo("5678", Todo{
 		Title:     "Test2",
@@ -178,11 +178,11 @@ func TestUpdateTodoError(t *testing.T) {
 	})
 
 	assert.Nil(t, todo)
-	assert.Equal(t, err.Error.Error(), "something wrong")
+	assert.Equal(t, "something wrong", err.Error.Error())
 }
 
 func TestDeleteTodo(t *testing.T) {
-	service := NewService(&repoMock{}, infra.GetLogger())
+	service := NewService(&repoMock{}, logger.GetLogger())
 
 	err := service.DeleteTodo("1234")
 
@@ -190,9 +190,9 @@ func TestDeleteTodo(t *testing.T) {
 }
 
 func TestDeleteTodoError(t *testing.T) {
-	service := NewService(&repoMockErr{}, infra.GetLogger())
+	service := NewService(&repoMockErr{}, logger.GetLogger())
 
 	err := service.DeleteTodo("1234")
 
-	assert.Equal(t, err.Error.Error(), "something wrong")
+	assert.Equal(t, "something wrong", err.Error.Error())
 }
