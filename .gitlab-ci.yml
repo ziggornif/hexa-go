@@ -1,0 +1,56 @@
+image: golang:1.16-buster
+
+stages:
+  - 🧪 test
+  - 🐳 docker
+  - 🚀 deploy
+
+variables:
+  POSTGRES_DB: hexa-go
+  POSTGRES_USER: runner
+  POSTGRES_PASSWORD: runnerpass
+  POSTGRES_HOST_AUTH_METHOD: trust
+  DB_URL: postgres:5432
+  DB_NAME: hexa-go
+  DB_USER: runner
+  DB_PASSWORD: runnerpass
+
+lint:
+  stage: 🧪 test
+  script:
+    - go get -u github.com/mgechev/revive
+    - make lint
+
+audit:
+  stage: 🧪 test
+  script:
+    - go get -u github.com/securego/gosec/v2/cmd/gosec
+    - make audit
+
+test:
+  stage: 🧪 test
+  services:
+    - postgres:latest
+  script:
+    - go get -u github.com/jstemmer/go-junit-report
+    - make test
+  artifacts:
+    when: always
+    expire_in: 1 day
+    paths:
+      - coverage
+    reports:
+      junit:
+        - coverage/junit.xml
+
+docker:
+  stage: 🐳 docker
+  needs: ["lint", "test"]
+  image: docker
+  services:
+    - docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker build -t registry.gitlab.com/ziggornif/hexa-go:$CI_COMMIT_REF_SLUG .
+    - docker push registry.gitlab.com/ziggornif/hexa-go:$CI_COMMIT_REF_SLUG
+
