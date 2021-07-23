@@ -11,5 +11,8 @@ type HexagoError struct {
 }
 
 func (err HexagoError) String() string {
-	return fmt.Sprintf("%s Error - %s", err.Kind, err.Error.Error())
+	if len(err.Kind) == 0 {
+		err.Kind = "Error"
+	}
+	return fmt.Sprintf("%s - %s", err.Kind, err.Error.Error())
 }

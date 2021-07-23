@@ -46,7 +46,8 @@ func NewTodoController(route *gin.RouterGroup, service todo.Service, logger *log
 func (ctrl *tcontroller) postTodo(c *gin.Context) {
 	query := todo.Todo{}
 	if err := c.ShouldBindBodyWith(&query, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctrl.logger.Debugf("context : %s", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid entity"})
 		return
 	}
 
