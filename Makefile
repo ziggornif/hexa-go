@@ -1,7 +1,6 @@
 COVERAGE_DIR=coverage
 MAIN=main.go
 
-
 audit:
 	gosec ./...
 
@@ -18,6 +17,7 @@ test-junit:
 
 build:
 	go build -ldflags "-w -s" -o hexa-go $(MAIN)
+	upx -8 hexa-go
 
 unused:
 	go mod tidy

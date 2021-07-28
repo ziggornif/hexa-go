@@ -3,7 +3,7 @@ RUN apk update && apk add upx gcc make g++
 
 WORKDIR /build
 ADD . .
-RUN go build -ldflags "-w -s" -o hexa-go main.go
+RUN make build
 
 FROM alpine
 COPY --from=builder /build/hexa-go /bin/hexa-go

@@ -1,9 +1,7 @@
 coverage
-api.rest
 .git
 .gitignore
 .gitlab-ci.yml
 config.json
 defaults.toml
 Dockerfile
-Makefile
